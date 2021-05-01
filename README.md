@@ -10,8 +10,20 @@ El repositorio consta de un conjunto de plantillas que se ejecutan en un orden, 
 ## Orden de despliegue de las plantillas
 
 1. template-newvpc-v2.yaml
+
+Esta plantilla Crea una VPC con el siguiente segmento de red: 10.1.96.0/24. y a su vez crea 5 subredes en diferentes AZ cada una; 3 son privadas y las otras 2 públicas.
+
 2. template-ec2-v2.yaml
+
+Esta plantilla Crea 2 instancias EC2 t3.micro con una AMI de Centos 7. adicional cada instancia se monta un disco con 10 GB Gp2 como una partición añadida a la ruta "/data_test"; como servicio se Implemento un servidor web Apache los EC2 creados utilizando docker-compose.
+
+Se creo un script sh que recopile el total de las conexiones abiertas en el servidor web Apache implementado, para cada hora del día en curso. los archivos de registro de Apache.
+
 3. template-publicalb-v2.yaml
+
+Esta plantilla crea un balanceador de carga de aplicaciones AWS como el único punto de entrada para sus solicitudes en la página web. Este componente balancea las solicitudes entrantes entre los dos EC2.
+
+El balanceador de carga sólo responde a la solicitud de páginas web a través del puerto 80 con HTTP.
 
 
 ## Steps to Run
