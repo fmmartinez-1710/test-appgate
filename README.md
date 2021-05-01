@@ -30,7 +30,7 @@ El balanceador de carga sólo responde a la solicitud de páginas web a través 
 
 haga clic en uno de los enlaces Launch Stack a continuación o descargue el proyecto y ejecutelo en el orden mencionado.
 
-Puede lanzar estas plantillas utilizando CloudFormation, con su cuenta, en las siguientes regiones de AWS:
+Puede lanzar estas plantillas utilizando CloudFormation, con su cuenta, en las siguiente regione de AWS:
 
 | AWS Region Code | Name | Launch |
 | --- | --- | --- 

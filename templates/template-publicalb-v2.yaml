@@ -14,15 +14,12 @@ Metadata:
         default: ALB Parameters
       Parameters:
         - Vpc
-        - PublicAlbAcmCertificate
         - PublicAlbSecurityGroup
         - NumberOfSubnets
         - Subnet
     ParameterLabels:
       Vpc:
         default: Vpc Id
-      PublicAlbAcmCertificate:
-        default: ALB Certificate ARN
       PublicAlbSecurityGroup:
         default: Public ALB Security Group
       NumberOfSubnets:
@@ -42,10 +39,6 @@ Parameters:
     Default: 2
     Description: Number of subnets. This must match your selections in the list of subnets below.
     Type: String 
-  PublicAlbAcmCertificate:
-    AllowedPattern: ^$|(arn:aws:acm:)([a-z0-9/:-])*([a-z0-9])$
-    Description: '[ Optional ] The AWS Certification Manager certificate ARN for the ALB certificate'
-    Type: String
   PublicAlbSecurityGroup:
     Description: Select the ALB security group.
     Type: AWS::EC2::SecurityGroup::Id
@@ -64,22 +57,6 @@ Parameters:
 
 Conditions:
 
-  SslCertificate:
-    !Not [!Equals [ '', !Ref PublicAlbAcmCertificate ] ]
-  NoSslCertificate:
-    !Equals [ '', !Ref PublicAlbAcmCertificate ]
-  NumberOfSubnets1:
-      !Equals [ 1, !Ref NumberOfSubnets ]
-  NumberOfSubnets2:
-      !Equals [ 2, !Ref NumberOfSubnets ]
-  NumberOfSubnets3:
-      !Equals [ 3, !Ref NumberOfSubnets ]
-  NumberOfSubnets4:
-      !Equals [ 4, !Ref NumberOfSubnets ]
-  NumberOfSubnets5:
-      !Equals [ 5, !Ref NumberOfSubnets ]
-  NumberOfSubnets6:
-      !Equals [ 6, !Ref NumberOfSubnets ]
   Subnet0: !Or
     - !Condition NumberOfSubnets1
     - !Condition NumberOfSubnets2
@@ -105,18 +82,6 @@ Resources:
       LoadBalancerArn: !Ref PublicApplicationLoadBalancer
       Port: 80
       Protocol: HTTP
-  PublicAlbListenerSslCertificate:
-    Condition: SslCertificate
-    Type : AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      Certificates:
-      - CertificateArn: !Ref PublicAlbAcmCertificate
-      DefaultActions:
-      - Type: forward
-        TargetGroupArn: !Ref PublicAlbTargetGroup
-      LoadBalancerArn: !Ref PublicApplicationLoadBalancer
-      Port: 443
-      Protocol: HTTPS
   PublicApplicationLoadBalancer: 
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
