@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Sample template to provision an EC2 Instance with public IP. Create a Security Group and associate with this EC2.
+
+Metadata:
+
+  Authors:
+    Description: Fabian Martinez (fabian.martinezn1989@outlook.com)
+
+Parameters:
+  VPCid:
+    Description: Select an existing Vpc
+    Type: 'AWS::EC2::VPC::Id'
+  SubnetId:
+    Description: Select id subnet PublicSubnet0 from the Outputs
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-0d48a2563b83bb50b
+  KeyPairName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+Mappings:
+  RegionMap:
+    ap-northeast-1:
+      CentOS7x8664EBSHVM: ami-045f38c93733dd48d
+    ap-northeast-2:
+      CentOS7x8664EBSHVM: ami-06cf2a72dadf92410
+    ap-south-1:
+      CentOS7x8664EBSHVM: ami-02e60be79e78fef21
+    ap-southeast-1:
+      CentOS7x8664EBSHVM: ami-0b4dd9d65556cac22
+    ap-southeast-2:
+      CentOS7x8664EBSHVM: ami-08bd00d7713a39e7d
+    ca-central-1:
+      CentOS7x8664EBSHVM: ami-033e6106180a626d0
+    eu-central-1:
+      CentOS7x8664EBSHVM: ami-04cf43aca3e6f3de3
+    eu-north-1:
+      CentOS7x8664EBSHVM: ami-5ee66f20
+    eu-west-1:
+      CentOS7x8664EBSHVM: ami-0ff760d16d9497662
+    eu-west-2:
+      CentOS7x8664EBSHVM: ami-0eab3a90fc693af19
+    eu-west-3:
+      CentOS7x8664EBSHVM: ami-0e1ab783dc9489f34
+    sa-east-1:
+      CentOS7x8664EBSHVM: ami-0b8d86d4bf91850af
+    us-east-1:
+      CentOS7x8664EBSHVM: ami-02eac2c0129f6376b
+    us-east-2:
+      CentOS7x8664EBSHVM: ami-0f2b4fc905b0bd1f1
+    us-west-1:
+      CentOS7x8664EBSHVM: ami-074e2d6769f445be5
+    us-west-2:
+      CentOS7x8664EBSHVM: ami-01ed306a12b7d1c96
+Resources:
+  mySG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable http(80) & ssh(22) access
+      GroupName: WebServer-SG
+      VpcId: !Ref VPCid
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: demo-sg
+        - Key: Application
+          Value:
+            Ref: 'AWS::StackName'
+  SGBaseIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref mySG
+      IpProtocol: '-1'
+      FromPort: '-1'
+      ToPort: '-1'
+      SourceSecurityGroupId: !Ref mySG
+  EC2Instance1:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      BlockDeviceMappings:
+        # Create a separate volume
+        - DeviceName: /dev/sdf
+          Ebs:
+            DeleteOnTermination: false
+            VolumeSize: 10
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref mySG
+      KeyName: !Ref KeyPairName
+      ImageId: !FindInMap 
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - CentOS7x8664EBSHVM
+      UserData:
+        'Fn::Base64': |
+          #!/bin/bash -xe
+          yum update -y
+          yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+          yum install -y yum-utils device-mapper-persistent-data lvm2 docker-ce unzip wget
+          systemctl enable docker
+          systemctl start docker
+          curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+          wget https://github.com/fmmartinez-1710/test-appgate/archive/refs/heads/main.zip
+          unzip main.zip -d /opt
+          cd /opt/test-appgate-main
+          unzip appgate.zip -d /opt/test-appgate-main/data
+          echo '59 * * * * sh /opt/test-appgate-main/recompile_conexion.sh' > /tmp/mycrontab
+          crontab /tmp/mycrontab
+          docker-compose up -d
+          pvcreate /dev/xvdf
+          vgcreate vg0 /dev/xvdf
+          lvcreate -l 100%FREE -n data_test vg0
+          mkfs.ext4 /dev/vg0/data_test
+          mkdir /data_test
+          echo "/dev/mapper/vg0-data_test /data_test ext4 defaults 0 2" >> /etc/fstab
+          mount -a          
+      Tags:
+        - Key: Name
+          Value: demo1-ec2
+        - Key: Application
+          Value:
+            Ref: 'AWS::StackName'
+  EC2Instance2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      BlockDeviceMappings:
+        # Create a separate volume
+        - DeviceName: /dev/sdf
+          Ebs:
+            DeleteOnTermination: false
+            VolumeSize: 10
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref mySG
+      KeyName: !Ref KeyPairName
+      ImageId: !FindInMap 
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - CentOS7x8664EBSHVM
+      UserData:
+        'Fn::Base64': |
+          #!/bin/bash -xe
+          yum update -y
+          yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+          yum install -y yum-utils device-mapper-persistent-data lvm2 docker-ce unzip wget
+          systemctl enable docker
+          systemctl start docker
+          curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+          wget https://github.com/fmmartinez-1710/test-appgate/archive/refs/heads/main.zip
+          unzip main.zip -d /opt
+          cd /opt/test-appgate-main
+          unzip appgate.zip -d /opt/test-appgate-main/data
+          echo '59 * * * * sh /opt/test-appgate-main/recompile_conexion.sh' > /tmp/mycrontab
+          crontab /tmp/mycrontab
+          docker-compose up -d
+          pvcreate /dev/xvdf
+          vgcreate vg0 /dev/xvdf
+          lvcreate -l 100%FREE -n data_test vg0
+          mkfs.ext4 /dev/vg0/data_test
+          mkdir /data_test
+          echo "/dev/mapper/vg0-data_test /data_test ext4 defaults 0 2" >> /etc/fstab
+          mount -a          
+      Tags:
+        - Key: Name
+          Value: demo2-ec2
+        - Key: Application
+          Value:
+            Ref: 'AWS::StackName'
+
+Outputs:
+  InstanceId:
+    Description: InstanceId of the first EC2 instance
+    Value: !Ref EC2Instance1
+  PublicDNS:
+    Description: Public DNS Name of the EC2 instance
+    Value: !GetAtt 
+      - EC2Instance1
+      - PublicDnsName
+  PublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt 
+      - EC2Instance1
+      - PublicIp
+  InstanceId2:
+    Description: InstanceId of the first EC2 instance
+    Value: !Ref EC2Instance2
+  PublicDNS2:
+    Description: Public DNS Name of the EC2 instance
+    Value: !GetAtt 
+      - EC2Instance2
+      - PublicDnsName
+  PublicIP2:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt 
+      - EC2Instance2
+      - PublicIp
