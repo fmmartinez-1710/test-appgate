@@ -8,3 +8,5 @@ services:
       - '443:443'
     volumes:
       - ./data:/usr/local/apache2/htdocs
+      - ./logs:/usr/local/apache2/logs
+      - ./httpd.conf:/usr/local/apache2/conf/httpd.conf
