@@ -7,6 +7,10 @@ Esta proyecto proporciona un conjunto de plantillas YAML para implementar una pa
 
 El repositorio consta de un conjunto de plantillas que se ejecutan en un orden, ingresando los parámetros apropiados para cada pila.
 
+Se requerirá que especifique un par de claves de Amazon EC2 para la autenticación, como cuando configura el acceso SSH a sus instancias.
+
+Se debe crear un key pair de Amazon EC2 desde con la Consola de administración de AWS.
+
 ## Orden de despliegue de las plantillas
 
 1. template-newvpc-v2.yaml
