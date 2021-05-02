@@ -53,6 +53,7 @@ Revise la plantilla aquí  [template-publicalb-v2.yaml](templates/template-publi
 ## Parametros plantillas
 
 template-newvpc-v2.yaml
+
 ![](images/parametros-plantilla-vpc.png)
 
 template-ec2-v2.yaml
