@@ -39,7 +39,7 @@ Puede lanzar estas plantillas utilizando CloudFormation, con su cuenta, en las s
 | AWS Region Code | Name | Launch |
 | --- | --- | --- 
 
-| us-west-2 |US West (Oregon)| [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://cf-templates-1cqk0g2gl5dq9-us-west-2.s3-us-west-2.amazonaws.com/template-newvpc-v2.yaml) |
+| us-west-2 |US West (Oregon)| [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=WordPress&templateURL=https://cf-templates-1cqk0g2gl5dq9-us-west-2.s3-us-west-2.amazonaws.com/template-newvpc-v2.yaml) |
 
 ## Amazon Virtual Private Cloud (Amazon VPC) Template
 Revise la plantilla aquí  [template-newvpc-v2.yaml](templates/template-newvpc-v2.yaml)
