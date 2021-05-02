@@ -48,4 +48,17 @@ Revise la plantilla aquí  [template-newvpc-v2.yaml](templates/template-newvpc-v
 Revise la plantilla aquí  [template-ec2-v2.yaml](templates/template-ec2-v2.yaml)
 
 ## Amazon Elastic Load Balancing - Application Load Balancer Template
-Revise la plantilla aquí  [aws-refarch-wordpress-03-publicelb.yaml](templates/template-publicalb-v2.yaml)
+Revise la plantilla aquí  [template-publicalb-v2.yaml](templates/template-publicalb-v2.yaml)
+
+## Parametros plantillas
+
+template-newvpc-v2.yaml
+![](images/parametros-plantilla-vpc.png)
+
+template-ec2-v2.yaml
+
+![](images/parametros-plantilla-ec2.png)
+
+template-publicalb-v2.yaml
+
+![](images/parametros-plantilla-lb.png)
